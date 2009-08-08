@@ -1,0 +1,86 @@
+Installation instructions
+-------------------------
+
+1. Copy loathsxome.cgi to somewhere on your web server where it can be
+   executed. Let us assume that you make it accessible at the URL
+   <http://example.org/despot/loathsxome.cgi>
+
+2. Optional: if you want to avoid exposing "loathsxome.cgi" in URLs, you
+   can write mod_rewrite rules to hide it. Supposing you wish to publish
+   your journal at <http://example.org/despot/journal>, you can create a
+   directory named journal, and associate the following rules with it:
+
+        Options FollowSymLinks
+        RewriteEngine on
+        RewriteRule /journal$ /despot/loathsxome.cgi [L]
+        RewriteRule (.*) /despot/loathsxome.cgi/$1
+
+   (These rules can live either in a <Directory> section somewhere in
+   httpd.conf or, if the configuration includes "AllowOverride all",
+   in journal/.htaccess.)
+
+   Note: This step assumes that you are using Apache. Other servers have
+   different ways to accomplish the same effect.
+
+3. You need to create a data directory for Loathsxome, where the journal
+   entries will live. Let us suppose you create /home/despot/loathsxome.
+   You also need directories for plugins and plugin data, so create
+   /home/despot/loathsxome/plugins and
+   /home/despot/loathsxome/plugins/state too.
+
+4. Edit loathsxome.cgi and set values in the "Configuration" section.
+   You need to change $name and $description, set $url to the URL you
+   want to publish (if you use mod_rewrite as described in step (2),
+   you must set $url, otherwise you can set it to an empty string).
+   Set $datadir etc. to the directories you created in step (3).
+
+5. Copy the desired plugins to the plugin directory. The simplest way is
+   to copy plugins/bundle_ to /home/despot/loathsxome/plugins/bundle (no
+   trailing _ on the second name). Or you can pick and choose plugins.
+
+6. loathsxome.cgi fills in the built-in template components to generate
+   the header, body, and footer of each page, but you can override this
+   by creating template files in $datadir. For example, to override the
+   built-in HTML components, create /home/despot/loathsxome/head.html,
+   date.html, story.html, and foot.html.
+
+   Look at the end of loathsxome.cgi (after __DATA__) to see what the
+   built-in template components look like. You can edit these in-place
+   instead of creating separate files, if you like.
+
+7. Optional: If you intend to store journal entries in a git repository,
+   you can use the included post-commit hook to add "meta: date=YMDHMS"
+   lines to your posts and maintain an up-to-date cache of file entries.
+   Copy scripts/post-commit to your .git/hooks directory and edit it to
+   set the correct directory names. (If you're not using the default
+   directory layout, you will need to edit the script a little more.
+   Read the comments in the file.)
+
+   Of course, you can also set up some other way to maintain the entry
+   cache. See plugins/entrycache for more details.
+
+A note on the documentation
+---------------------------
+
+I am aware that Loathsxome has inadequate documentation, and I consider
+this a serious bug. The source code is well-documented, but there is no
+user manual. I wrote the program for myself, at first with no intention
+to release it, and later with no expectation that more than a few of my
+friends would use it. But that is not an excuse for poor documentation,
+and I would like to improve it.
+
+Suggestions are welcome. Please let me know if you have questions about
+any aspect of installing, using, or extending Loathsxome. I will try to
+answer them and use the answers as the basis for better documentation.
+(Knowing that the documentation would actually be useful to someone
+would provide motivation to write it.)
+
+In the meantime, the Blosxom documentation may be useful. Most of the
+ideas translate directly, but the details may differ slightly. If you
+are at all familiar with Perl, the source code may help to explain
+those details. <http://blosxom.sourceforge.net/documentation/>
+
+See http://toroid.org/loathsxome for more details.
+
+--
+Abhijit Menon-Sen <ams@toroid.org>
