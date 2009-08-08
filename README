@@ -1,0 +1,43 @@
+Loathsxome
+----------
+
+Loathsxome is a minimalist and opinionated program inspired by Blosxom.
+It allows you to maintain a web log where individual entries are simple
+text files. Its default behaviour is what I consider sensible for my own
+journal, but it can be changed easily.
+
+Loathsxome knows how to display two kinds of things: a single journal
+entry or post, and an "index view" or list of posts (all posts, or those
+that match some criterion, such as "tagged with 'horror'" or "written in
+May 2009"). It features nice-looking URLs, RSS feed generation, support
+for tagging and categorisation by directory, and so on. If you use Git
+to maintain your web site, as I do, you'll find that Loathsxome works
+very well with it.
+
+The code is easy to follow, and well-documented; the plugin system is
+simple but powerful. Plugins can affect any aspect of the program's
+operation, from URL parsing to post selection and rendering. 
+
+Compared to Blosxom, Loathsxome has two notable disadvantages: it is not
+compatible with existing Blosxom plugins, and it does not support static
+generation. (But the plugin interface is so similar that most plugins
+can be ported with a few minutes' work; and I intend to implement static
+generation in a future release.) 
+
+Existing Blosxom users may find little reason to switch, especially if
+they have invested some effort into selecting and configuring plugins.
+But it takes real work to configure Blosxom to duplicate Loathsxome's
+default behaviour, so new users who like that behaviour can save time
+by using Loathsxome; and anyone who wants to extend the code will
+appreciate its improved internal organisation.
+
+Loathsxome is a CGI program written in Perl (without any CPAN
+dependencies). This distribution contains loathsxome.cgi and some
+plugins. It is distributed under an MIT-style open source license.
+(See the included LICENSE file for details.) 
+
+See http://toroid.org/loathsxome for more details.
+
+--
+Copyright 2009 Abhijit Menon-Sen <ams@toroid.org>
+http://toroid.org/loathsxome
