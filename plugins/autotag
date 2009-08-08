@@ -1,0 +1,28 @@
+# Loathsxome plugin: autotag
+# Abhijit Menon-Sen <ams@toroid.org>
+#
+# Tags posts based on the directory they're in.
+#
+# A post named a/b/x.post would be tagged "a/b". With this plugin, you
+# can categorise posts by directory and forget about tags altogether.
+
+package loathsxome::autotag;
+
+sub start {
+    1;
+}
+
+sub filter {
+    foreach my $entry (keys %loathsxome::entries) {
+        next if $entry !~ /\//;
+
+        my %have = map { $_ => 1 } @{$loathsxome::entries{$entry}{tags}};
+        (my $path = $entry) =~ s/\/[^\/]+$//;
+
+        if (not exists $have{$path}) {
+            push @{$loathsxome::entries{$entry}{tags}}, $path;
+        }
+    }
+}
+
+1;

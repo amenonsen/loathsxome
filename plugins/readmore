@@ -1,0 +1,24 @@
+# Loathsxome plugin: readmore
+# Author: Abhijit Menon-Sen <ams@toroid.org>
+#
+# Generates "Read more…" links for posts with ^L in them
+
+package loathsxome::readmore;
+
+sub start {
+    1;
+}
+
+sub story {
+    my ($pkg, $post, $filename, $story, $title, $body) = @_;
+
+    # "Read more" links for long posts (only) on HTML index views
+    if ($loathsxome::content_type =~ /^text\/html/ and
+        not $loathsxome::post)
+    {
+        my $link = "$loathsxome::postlink";
+        $$body =~ s{\cL.*}{<a href="$link">Read more\&hellip;</a>}sm;
+    }
+}
+
+1;

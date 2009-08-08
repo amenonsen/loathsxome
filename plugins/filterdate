@@ -1,0 +1,34 @@
+# Loathsxome plugin: filterdate
+# Abhijit Menon-Sen <ams@toroid.org>
+#
+# Parses YYYY[MM[DD]] filter expressions in PATH_INFO, and restricts the
+# view to posts matching the specified dates.
+
+package loathsxome::filterdate;
+
+use POSIX qw/strftime/;
+
+sub start {
+    1;
+}
+
+sub parse_uri {
+    return 1 if $loathsxome::post;
+
+    if ($loathsxome::path_info =~ s/^(\d{8}|\d{6}|\d{4})\/?//) {
+        $loathsxome::filters{date} = $1;
+    }
+}
+
+sub filter {
+    if (exists $loathsxome::filters{date}) {
+        foreach my $entry (keys %loathsxome::entries) {
+            my $f = $loathsxome::filters{date};
+            my $m = $loathsxome::entries{$entry}{mtime};
+            my $d = POSIX::strftime("%Y%m%d", localtime($m));
+            delete $loathsxome::entries{$entry} unless $d =~ /^$f/;
+        }
+    }
+}
+
+1;

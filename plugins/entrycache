@@ -1,0 +1,46 @@
+# Loathsxome plugin: entrycache
+# Abhijit Menon-Sen <ams@toroid.org>
+#
+# Loads entries from $statedir/entries, if that file exists.
+#
+# The entries file is assumed to contain one line per post, with the
+# following format (where the filename is relative to $datadir):
+#
+# filename mtime=NNNN tags=a+b key=value ...
+
+package loathsxome::entrycache;
+
+sub start {
+    1;
+}
+
+sub entries {
+    return undef unless -f "$loathsxome::statedir/entries";
+    return sub {
+        my %entries;
+
+        if (open(my $fh, "$loathsxome::statedir/entries")) {
+            while (<$fh>) {
+                chomp;
+
+                next unless s/^(\S+) //;
+                my $f = $1;
+
+                my $prop = { mtime => 0, tags => [] };
+                while ($_) {
+                    if (s/^mtime=(\d+) ?//) {
+                        $prop->{mtime} = $1-$loathsxome::gmtoff;
+                    }
+                    if (s/^tags=((?:[\w\d-]+\+)*[\w\d-]*) ?//) {
+                        push @{$prop->{tags}}, split(/\+/, $1);
+                    }
+                }
+                $entries{$f} = $prop;
+            }
+        }
+
+        return %entries;
+    };
+}
+
+1;

@@ -1,0 +1,68 @@
+# Loathsxome plugin: filtertag
+# Abhijit Menon-Sen <ams@toroid.org>
+#
+# Parses tag filter expressions in PATH_INFO, and restricts the view to
+# posts matching the specified tag(s).
+#
+# Template variables:
+#
+# $rsslink is a link to the most relevant RSS feed for a set of results.
+# $taglinks is a string containing zero or more links to the individual
+# tags for a post.
+
+package loathsxome::filtertag;
+
+sub start {
+    1;
+}
+
+sub parse_uri {
+    return 1 if $loathsxome::post;
+
+    while ($loathsxome::path_info =~ s/^(\w+)(?:[\+\/]|$)//) {
+        push @{$loathsxome::filters{tags}}, $1;
+    }
+}
+
+sub filter {
+    my %want;
+    if (exists $loathsxome::filters{tags}) {
+        %want = map { $_ => 1 } @{$loathsxome::filters{tags}};
+    }
+
+    foreach my $entry (keys %loathsxome::entries) {
+        my %have = map { $_ => 1 } @{$loathsxome::entries{$entry}{tags}};
+
+        foreach my $tag (keys %want) {
+            delete $loathsxome::entries{$entry}
+                unless exists $have{$tag};
+        }
+    }
+}
+
+sub head {
+    my ($pkg, $post, $head) = @_;
+
+    if (exists $loathsxome::filters{tags}) {
+        my $tags = join '+', @{$loathsxome::filters{tags}};
+        $loathsxome::rsslink = qq{$loathsxome::url/$tags/index.rss};
+    }
+
+    return 1;
+}
+
+sub story {
+    my ($pkg, $entry, $fn, $story, $title, $body) = @_;
+
+    my @links;
+    foreach my $tag (@{$loathsxome::entries{$entry}{tags}}) {
+        push @links, qq{<a href="$loathsxome::url/$tag">$tag</a>};
+    }
+
+    $loathsxome::taglinks = "";
+    if (@links) {
+        $loathsxome::taglinks = join ', ', @links;
+    }
+}
+
+1;

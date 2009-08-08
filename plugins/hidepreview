@@ -1,0 +1,29 @@
+# Loathsxome plugin: hidepreview
+# Abhijit Menon-Sen <ams@toroid.org>
+#
+# Hide posts tagged "preview" unless they're specifically asked for
+# in PATH_INFO.
+
+package loathsxome::hidepreview;
+
+sub start {
+    1;
+}
+
+sub filter {
+    my %want;
+    if (exists $loathsxome::filters{tags}) {
+        %want = map { $_ => 1 } @{$loathsxome::filters{tags}};
+    }
+
+    foreach my $entry (keys %loathsxome::entries) {
+        my %have = map { $_ => 1 } @{$loathsxome::entries{$entry}{tags}};
+
+        if (not exists $want{preview} and exists $have{preview}) {
+            delete $loathsxome::entries{$entry};
+            next;
+        }
+    }
+}
+
+1;
