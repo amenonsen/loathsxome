@@ -1,0 +1,239 @@
+# Loathsxome plugin: example
+# Abhijit Menon-Sen <ams@toroid.org>
+#
+# The Loathsxome plugin interface is slightly different from the one in
+# Blosxom. This example explains how and when the plugin functions are
+# called, and what they are expected to do.
+#
+
+
+## 1. Plugin files
+#
+# A plugin file must have an alphanumeric name (\w+) and live in the
+# directory specified in $loathsxome::plugindir.
+#
+# This plugin (named "example") may live in a file named "example",
+# or "23example" (to alter the default alphabetic loading order), or
+# "example_" (to prevent it from being loaded at all).
+#
+# A plugin named example must declare the package "loathsxome::example".
+# (The plugin file must return a true value, like any Perl module.)
+
+package loathsxome::example;
+
+
+## 2. Plugin functions
+#
+# Loathsxome calls the following functions defined in the package:
+# start, parse_uri, entries, filter, sort, template, interpolate,
+# head, date, story, foot, last, end.
+#
+# The first defined value returned by any plugin from entries, sort,
+# template, or interpolate will be used; and those functions will not
+# be called for later plugins. But the other functions are called in
+# turn for each plugin that defines them.
+#
+# A plugin must define at least a start() function (if it doesn't, or
+# if the function returns a false value, the plugin will be ignored).
+
+sub start {
+    # Called without arguments when the plugin is first loaded. If it
+    # returns a true value, the plugin is enabled; otherwise, it is
+    # ignored.
+
+    1;
+}
+
+sub parse_uri {
+    # Called without arguments while parsing PATH_INFO. This function is
+    # expected to look at $loathsxome::path_info and remove anything it
+    # deems acceptable. (Anything left over at the end will be treated
+    # as an error.)
+    #
+    # Plugins that want to filter entries based on the PATH_INFO can add
+    # an entry to %loathsxome::filters here and define a filter function
+    # to act on it later. For example, see filterdate and filtertag.
+}
+
+## 2.1. Post selection
+#
+# Quick summary: first, a listing function is called to generate a list
+# of all posts (filenames relative to $loathsxome::datadir), then each
+# plugin is given an opportunity to filter the list, then a sorting
+# function is called to sort the list for display.
+
+sub entries {
+    # The default listing function looks for files named *.post under
+    # $datadir.
+    #
+    # This function is expected to return a listing function to override
+    # the default: a reference to a function that takes no arguments and
+    # returns a hash whose keys are filenames (relative to $datadir) and
+    # whose values are hashes where each entry represents a property of
+    # that file (such as its mtime).
+    #
+    # If it returns undef, the next plugin in line is given a chance to
+    # define the listing function.
+
+    return undef;
+}
+
+sub filter {
+    # Called without arguments after %loathsxome::entries has been
+    # populated with the output from the entries function. A filter
+    # function may modify %entries as it wants, including adding or
+    # removing entries.
+    #
+    # For plugins that filter entries based on some part of the URI,
+    # see the comments in parse_uri above.
+    #
+    # If %entries is empty after all the filter functions have been
+    # called, the core will generate a 404 error.
+}
+
+sub sort {
+    # The default sorting function sorts entries in descending order of
+    # their mtime.
+    #
+    # This function is expected to return a sorting function to override
+    # the default: a reference to a function that takes no arguments and
+    # returns an array of the keys of %entries (i.e. post filenames) in
+    # some order.
+    #
+    # If it returns undef, the next plugin in line is given a chance to
+    # define the sorting function.
+
+    return undef;
+}
+
+
+## 2.2. Template handling
+#
+# There are five template components: content_type, head, date, story,
+# and foot. These components must be defined for each flavour that we
+# want to support (e.g. html, rss).
+
+sub template {
+    # The default templating function takes the filename of a post, the
+    # name of a component, and a flavour; and it returns the appropriate
+    # template component, either from $component.$flavour files near the
+    # post, or from the built-in components.
+    #
+    # This function is expected to return a templating function to
+    # override the default: a reference to a function that takes the
+    # same three arguments and returns some text.
+    #
+    # The built-in components are always available as
+    # $loathsxome::template{$flavour}{$component}.
+    #
+    # If it returns undef, the next plugin in line is given a chance to
+    # define the templating function.
+
+    return undef;
+}
+
+sub interpolate {
+    # The default interpolation function takes a string, replaces all
+    # variable references with values (i.e. '$x' with $loathsxome::x),
+    # and returns the new string.
+    #
+    # This function is expected to return an interpolation function to
+    # override the default: a reference to a function that accepts and
+    # returns a string.
+    #
+    # If it returns undef, the next plugin in line is given a chance to
+    # define the interpolation function.
+
+    return undef;
+}
+
+
+## 2.3. Output generation
+#
+# The output consists of a header, a date, the contents of an entry, and
+# a footer. For index views (i.e., a list of posts), the date and entry
+# are repeated as many times as needed (but adjacent entries with the
+# same date will be squashed together under a single date).
+
+sub head {
+    my ($pkg, $post, $head_ref) = @_;
+
+    # The core loads the "head" template component for the relevant
+    # flavour, and then allows plugins to modify it by calling this
+    # function.
+    #
+    # $post is either undef (if we're generating an index view) or the
+    # filename of a single post (in which case that file has already
+    # been read, and the title and body are available in %entries).
+    #
+    # This function may modify $$head_ref as it wishes, or just define
+    # variables under $loathsxome:: that are used during interpolation.
+}
+
+sub date {
+    my ($pkg, $entry, $date_ref) = @_;
+
+    # The core loads the "date" template component for the relevant
+    # flavour, and then allows plugins to modify it by calling this
+    # function.
+    #
+    # $entry is the filename of the post for which we are generating the
+    # date. Its properties are available in %entries. (If we are going
+    # to display only one post, then $loathsxome::post is defined.)
+    #
+    # This function may modify $$date_ref as it wishes, or just define
+    # variables under $loathsxome:: that are used during interpolation.
+}
+
+sub story {
+    my ($pkg, $entry, $fname, $story_ref, $title_ref, $body_ref) = @_;
+
+    # The core loads the "story" template component for the relevant
+    # flavour, and then allows plugins to modify it by calling this
+    # function.
+    #
+    # $entry is the filename of the post whose contents we are going to
+    # display. Its properties are available in %entries. (If we will be
+    # displaying only one post, then $loathsxome::post is its filename.)
+    #
+    # $fname is $entry without the file extention (.post).
+    # $loathsxome::postlink contains the canonical URL for this post.
+    #
+    # $story_ref is a reference to the contents of the story template.
+    # $title_ref is a reference to the title extracted from $entry.
+    # $body_ref is a reference to the contents extracted from $entry.
+    #
+    # This function may modify these references as it wishes, or just
+    # define variables under $loathsxome:: that are used during
+    # interpolation.
+}
+
+sub foot {
+    my($pkg, $post, $foot_ref) = @_;
+
+    # The core loads the "foot" template component for the relevant
+    # flavour, and then allows plugins to modify it by calling this
+    # function.
+    #
+    # $post is either undef (if we're generating an index view) or the
+    # filename of a single post, whose properties are available in
+    # %entries.
+    #
+    # This function may modify $$foot_ref as it wishes, or just define
+    # variables under $loathsxome:: that are used during interpolation.
+}
+
+
+## 2.4. Cleanup
+#
+# These functions are called with no expectations on their behaviour.
+
+sub last {
+    # Called without arguments at the end of output generation.
+}
+
+sub end {
+    # Called without arguments after all the work is done.
+}
+
+1;
