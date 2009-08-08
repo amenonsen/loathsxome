@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# Looks at *.post files after every commit. If any lack "meta: date=..."
+# lines, such lines are added based on current mtime. Then the cache is
+# updated with mtime and tags values from the posts, and if anything was
+# changed, a new commit is created.
+#
+# Warning: GNUisms (xargs -r, date @..., etc.)
+
+# This should be relative to the directory under which your .git lives.
+DATADIR=loathsxome
+ENTRIES=loathsxome/plugins/state/entries
+
+# Avoid recursion
+git log -1 --format=%s HEAD|grep -q "^Auto: " && exit
+
+# First, add "meta: date=" lines to any posts that don't have them
+# already. We'll touch only those *.posts that live under $DATADIR.
+for i in $(git diff --name-only HEAD^ HEAD|\
+           grep '^'$DATADIR'/.*\.post$'|\
+           xargs -r grep -L '^meta: date=');
+do
+    i=$(pwd)/$i
+    (head -1 $i;\
+     echo "meta: date=$(date "+%Y-%m-%d %H:%M:%S" -d @$(stat -c %Z $i))";\
+     tail -n +2 $i) > /tmp/post
+    mv /tmp/post $i
+    git add $i
+done
+
+# Next, update the cache.
+gmtoff=$(perl -MPOSIX=mktime,difftime -le 'print difftime(mktime(localtime),mktime(gmtime))')
+find $DATADIR -name \*.post|sed 's,^'$DATADIR'/,,'|
+while read a;
+do
+    for i in date tags;
+    do
+        meta="meta: $i="
+        v=$(grep -h "$meta" $DATADIR/$a|sed "s/$meta//")
+        eval $i=\"$v\" # "
+    done
+
+    mtime=$(($(date -d "$date" +%s)+$gmtoff))
+    tags=$(echo $tags|sed 's/, /+/')
+
+    echo $a mtime=$mtime tags=$tags
+done|sort > $ENTRIES
+test -f $ENTRIES && git add $ENTRIES
+
+git diff-index --quiet --cached HEAD || git commit -m "Auto: meta update."
