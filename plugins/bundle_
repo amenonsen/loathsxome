@@ -1,0 +1,222 @@
+# Loathsxome plugin: bundle
+# Abhijit Menon-Sen <ams@toroid.org>
+#
+# The default loathsxome plugins packed into a single bundle.
+#
+# Loathsxome comes with a number of plugins, distributed in separate
+# files for convenient reading. In actual use, however, you may want
+# to use this bundle to cut down on the number of files that need to
+# be opened to render each post.
+#
+# Contains: autotag entrycache filterdate filtertag fulldate hidepreview
+# metadata pagetitle paginate readmore
+#
+# Consult those plugins for documentation.
+
+package loathsxome::bundle;
+
+use CGI qw/:cgi/;
+use POSIX qw/ceil strftime/;
+
+our $page_size = 5;
+our ($page, $pages);
+
+sub start {
+    1;
+}
+
+sub parse_uri {
+    return 1 if $loathsxome::post;
+
+    if ($loathsxome::path_info =~ s/^(\d{8}|\d{6}|\d{4})\/?//) {
+        $loathsxome::filters{date} = $1;
+    }
+
+    while ($loathsxome::path_info =~ s/^(\w+)(?:[\+\/]|$)//) {
+        push @{$loathsxome::filters{tags}}, $1;
+    }
+}
+
+sub entries {
+    return undef unless -f "$loathsxome::statedir/entries";
+    return sub {
+        my %entries;
+
+        if (open(my $fh, "$loathsxome::statedir/entries")) {
+            while (<$fh>) {
+                chomp;
+
+                next unless s/^(\S+) //;
+                my $f = $1;
+
+                my $prop = { mtime => 0, tags => [] };
+                while ($_) {
+                    if (s/^mtime=(\d+) ?//) {
+                        $prop->{mtime} = $1-$loathsxome::gmtoff;
+                    }
+                    if (s/^tags=((?:[\w\d-]+\+)*[\w\d-]*) ?//) {
+                        push @{$prop->{tags}}, split(/\+/, $1);
+                    }
+                }
+                $entries{$f} = $prop;
+            }
+        }
+
+        return %entries;
+    };
+}
+
+sub filter {
+    foreach my $entry (keys %loathsxome::entries) {
+        next if $entry !~ /\//;
+
+        my %have = map { $_ => 1 } @{$loathsxome::entries{$entry}{tags}};
+        (my $path = $entry) =~ s/\/[^\/]+$//;
+
+        if (not exists $have{$path}) {
+            push @{$loathsxome::entries{$entry}{tags}}, $path;
+        }
+    }
+
+    if (exists $loathsxome::filters{date}) {
+        foreach my $entry (keys %loathsxome::entries) {
+            my $f = $loathsxome::filters{date};
+            my $m = $loathsxome::entries{$entry}{mtime};
+            my $d = POSIX::strftime("%Y%m%d", localtime($m));
+            delete $loathsxome::entries{$entry} unless $d =~ /^$f/;
+        }
+    }
+
+    my %want;
+    if (exists $loathsxome::filters{tags}) {
+        %want = map { $_ => 1 } @{$loathsxome::filters{tags}};
+    }
+
+    foreach my $entry (keys %loathsxome::entries) {
+        my %have = map { $_ => 1 } @{$loathsxome::entries{$entry}{tags}};
+
+        if (not exists $want{preview} and exists $have{preview}) {
+            delete $loathsxome::entries{$entry};
+            next;
+        }
+
+        foreach my $tag (keys %want) {
+            delete $loathsxome::entries{$entry}
+                unless exists $have{$tag};
+        }
+    }
+}
+
+sub sort {
+    return undef if $loathsxome::post;
+
+    $page = 1;
+    if (param("page") =~ /^(\d+)$/) {
+        $page = $1;
+    }
+
+    $pages = ceil(keys(%loathsxome::entries)/$page_size);
+    $loathsxome::startnum = 1 + ($page_size * ($page-1));
+    $loathsxome::endnum = $loathsxome::startnum+$page_size-1;
+
+    # We don't actually want to override the sorting function.
+    return undef;
+}
+
+sub head {
+    my ($pkg, $post, $head) = @_;
+
+    $loathsxome::heading = $loathsxome::name;
+    $loathsxome::pagetitle = $loathsxome::name;
+    if ($post) {
+        my $title = $loathsxome::entries{$post}{title};
+    	$loathsxome::pagetitle .= ": " . $title;
+    }
+
+    if (exists $loathsxome::filters{tags}) {
+        my $tags = join '+', @{$loathsxome::filters{tags}};
+        $loathsxome::rsslink = qq{$loathsxome::url/$tags/index.rss};
+    }
+
+    return if $post;
+
+    $loathsxome::newerposts = "";
+    if ($page > 1) {
+        param(page => $page-1);
+        my $url = url(-path_info => 1, -query => 1);
+        $loathsxome::newerposts =
+            qq{<a href="$url">&laquo; Newer posts</a>};
+    }
+
+    my @list;
+    for my $n (1..$pages) {
+        param(page => $n);
+        my $url = url(-path_info => 1, -query => 1);
+
+        push @list,
+            $n == $page ?
+                qq{<b>$n</b>} : qq{<a href="$url">$n</a>};
+    }
+
+    $loathsxome::pagelist = "";
+    if (@list > 1) {
+        $loathsxome::pagelist =
+            "[" . join(' ', @list) . "]";
+    }
+
+    $loathsxome::olderposts = "";
+    if ($pages > $page) {
+        param(page => $page+1);
+        my $url = url(-path_info => 1, -query => 1);
+        $loathsxome::olderposts =
+            qq{<a href="$url">Older posts &raquo;</a>};
+    }
+}
+
+sub date {
+    my ($pkg, $entry, $date) = @_;
+
+    my $mtime = $loathsxome::entries{$entry}->{mtime};
+
+    $loathsxome::fulldate =
+        strftime( "%A, %d %B %Y", localtime($mtime));
+    $loathsxome::datetime =
+        strftime( "%Y-%m-%d %H:%M:%S", localtime($mtime));
+}
+
+sub story {
+    my ($pkg, $entry, $fname, $story, $title, $body) = @_;
+
+    # Remove meta: lines from posts
+    my ($b, $in_header) = ('', 1);
+    foreach (split /\n/, $$body) {
+        /^\s*$/ and $in_header = 0 and next;
+        if ($in_header and my ($k, $v) = m{^meta: (\w+)=(.*)$}) {
+            $loathsxome::entries{$entry}{meta}{$k} = $v;
+            next;
+        }
+        $b .= $_ . "\n";
+    }
+    $$body = $b;
+
+    # "Read more" links for long posts (only) on HTML index views
+    if ($loathsxome::content_type =~ /^text\/html/ and
+        not $loathsxome::post)
+    {
+        my $link = "$loathsxome::postlink";
+        $$body =~ s{\cL.*}{<a href="$link">Read more\&hellip;</a>}sm;
+    }
+
+    # Fill in $taglinks
+    my @links;
+    foreach my $tag (@{$loathsxome::entries{$entry}{tags}}) {
+        push @links, qq{<a href="$loathsxome::url/$tag">$tag</a>};
+    }
+
+    $loathsxome::taglinks = "";
+    if (@links) {
+        $loathsxome::taglinks = join ', ', @links;
+    }
+}
+
+1;
