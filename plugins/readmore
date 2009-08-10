@@ -19,6 +19,7 @@ sub story {
         my $link = "$loathsxome::postlink";
         $$body =~ s{\cL.*}{<a href="$link">Read more\&hellip;</a>}sm;
     }
+    $$body =~ y/\cL//d;
 }
 
 1;
