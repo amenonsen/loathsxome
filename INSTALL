@@ -5,22 +5,25 @@ Installation instructions
    executed. Let us assume that you make it accessible at the URL
    <http://example.org/despot/loathsxome.cgi>
 
-2. Optional: if you want to avoid exposing "loathsxome.cgi" in URLs, you
-   can write mod_rewrite rules to hide it. Supposing you wish to publish
-   your journal at <http://example.org/despot/journal>, you can create a
-   directory named journal, and associate the following rules with it:
+2. Optional: You can avoid exposing "loathsxome.cgi" in URLs with some
+   help from Apache (other web servers will provide different ways to
+   accomplish the same effect).
 
-        Options FollowSymLinks
-        RewriteEngine on
-        RewriteRule /journal$ /despot/loathsxome.cgi [L]
-        RewriteRule (.*) /despot/loathsxome.cgi/$1
+   Suppose you want to publish <http://example.org/despot/journal>. If
+   you have access to httpd.conf, you could do something like this:
 
-   (These rules can live either in a <Directory> section somewhere in
-   httpd.conf or, if the configuration includes "AllowOverride all",
-   in journal/.htaccess.)
+       ScriptAliasMatch ^/despot/journal(.*) /var/www/despot/loathsxome.cgi$1
 
-   Note: This step assumes that you are using Apache. Other servers have
-   different ways to accomplish the same effect.
+   Otherwise, if the configuration includes "AllowOverride all", you can
+   put the following mod_rewrite rules in journal/.htaccess:
+
+       Options FollowSymLinks
+       RewriteEngine on
+       RewriteRule /journal$ /despot/loathsxome.cgi [L]
+       RewriteRule (.*) /despot/loathsxome.cgi/$1
+
+   Either way, requests to anything under /despot/journal are rewritten
+   to access loathsxome.cgi.
 
 3. You need to create a data directory for Loathsxome, where the journal
    entries will live. Let us suppose you create /home/despot/loathsxome.
