@@ -37,6 +37,7 @@ use vars qw(
     $version
 );
 
+use strict;
 use CGI qw/:standard/;
 use File::Find;
 use File::stat;
