@@ -6,6 +6,8 @@
 
 package loathsxome::fulldate;
 
+use POSIX qw/strftime/;
+
 sub start {
     1;
 }
