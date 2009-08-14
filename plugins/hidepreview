@@ -20,7 +20,8 @@ sub filter {
         my %have = map { $_ => 1 } @{$loathsxome::entries{$entry}{tags}};
 
         if (not exists $want{preview} and exists $have{preview}) {
-            delete $loathsxome::entries{$entry};
+            delete $loathsxome::entries{$entry}
+                unless $loathsxome::post && $entry eq $loathsxome::post;
             next;
         }
     }
