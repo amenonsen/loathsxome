@@ -373,7 +373,7 @@ __DATA__
 html content_type text/html; charset=utf-8
 html head <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 html head <html><head>
-html head <link rel=alternate type="application/rss+xml" title=RSS href="$rsslink">
+html head <link rel=alternate type="application/rss+xml" title="$name" href="$rsslink">
 html head <title>$pagetitle</title>
 html head </head><body>
 html head <h1>$heading</h1>
