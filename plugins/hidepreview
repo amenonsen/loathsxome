@@ -2,9 +2,12 @@
 # Abhijit Menon-Sen <ams@toroid.org>
 #
 # Hide posts tagged "preview" unless they're specifically asked for
-# in PATH_INFO.
+# in PATH_INFO. If $preview_postdated is set, also hide posts whose
+# mtime is in the future.
 
 package loathsxome::hidepreview;
+
+our $preview_postdated = 1;
 
 sub start {
     1;
@@ -18,6 +21,12 @@ sub filter {
 
     foreach my $entry (keys %loathsxome::entries) {
         my %have = map { $_ => 1 } @{$loathsxome::entries{$entry}{tags}};
+
+        if ($preview_postdated &&
+            $loathsxome::entries{$entry}{mtime} > time)
+        {
+            $have{preview} = 1;
+        }
 
         if (not exists $want{preview} and exists $have{preview}) {
             delete $loathsxome::entries{$entry}

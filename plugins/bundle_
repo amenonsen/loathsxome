@@ -21,6 +21,8 @@ use POSIX qw/ceil strftime/;
 our $page_size = 5;
 our ($page, $pages);
 
+our $preview_postdated = 1;
+
 sub start {
     1;
 }
@@ -94,6 +96,12 @@ sub filter {
 
     foreach my $entry (keys %loathsxome::entries) {
         my %have = map { $_ => 1 } @{$loathsxome::entries{$entry}{tags}};
+
+        if ($preview_postdated &&
+            $loathsxome::entries{$entry}{mtime} > time)
+        {
+            $have{preview} = 1;
+        }
 
         if (not exists $want{preview} and exists $have{preview}) {
             delete $loathsxome::entries{$entry}
