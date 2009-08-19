@@ -26,6 +26,7 @@ $depth = 0;
 
 $flavour = "html";
 @flavours = qw(html rss);
+@post_flavours = qw(html);
 
 # --- No user-serviceable parts below this line ---
 
@@ -34,7 +35,7 @@ use vars qw(
     $depth $flavour @flavours @plugins %filters $path_info $post $entries $sort
     %entries @entries %template $template $interpolate $content_type $output
     $title $body $startnum $endnum $fn $datetime $gmtoff $postlink $rsslink
-    $version
+    $version @post_flavours @index_flavours
 );
 
 use strict;
@@ -94,24 +95,32 @@ if ($plugindir and opendir PLUGINS, $plugindir) {
 # wishes; anything left over at the end is treated as an error.
 #
 # PATH_INFO = [ "/" ( post | index ) ]
-# post = ( path-component "/" )* path-component
+# post = ( ( path-component "/" )* path-component ) [ "." flavour ]
 # index = "index." flavour
 # path-component = [\w\d-.]+
 # flavour = [a-z]+
 #
 
+$flavour ||= "html";
+@post_flavours = @flavours unless @post_flavours;
+@index_flavours = @flavours unless @index_flavours;
+
 ($path_info = path_info()) =~ s/^\/*|\/*$//;
 
-if (-f "$datadir/$path_info.$extension") {
-    $post = "$path_info.$extension";
+my $pflavours = join '|', @post_flavours;
+my ($p, $f) = $path_info =~ m/^(.*?)(?:\.($pflavours))?$/;
+if (-f "$datadir/$p.$extension") {
     $path_info = "";
+    $post = "$p.$extension";
+    if ($f) {
+        $flavour = $f;
+    }
 }
 
 run_plugins('parse_uri');
 
-$flavour ||= "html";
-my $flavours = join '|', @flavours;
-if ($path_info =~ s/^index\.($flavours)$//) {
+my $iflavours = join '|', @index_flavours;
+if ($path_info =~ s/^index\.($iflavours)$//) {
     $flavour = $1;
 }
 
