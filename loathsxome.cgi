@@ -38,7 +38,6 @@ use vars qw(
     $version @post_flavours @index_flavours
 );
 
-use strict;
 use CGI qw/:standard/;
 use File::Find;
 use File::stat;
