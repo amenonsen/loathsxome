@@ -19,7 +19,23 @@ sub start {
 sub parse_uri {
     return 1 if $loathsxome::post;
 
-    while ($loathsxome::path_info =~ s/^(\w+)(?:[\+\/]|$)//) {
+    # In parsing the tag list, we have to consider the following cases
+    # (with or without trailing slashes):
+    #
+    # a         (a)     (common case)
+    # a+b       (a b)   (not unlikely)
+    # a/b       (a/b)   (used by autotag)
+    #
+    # We take a conservative approach that just happens to permit c++ as
+    # a valid tag name (as some people who shall remain nameless seem to
+    # expect). But don't try to use a tag named "a+b". Just Don't Do It.
+
+    if ($loathsxome::path_info =~ s/^((?:[\w\d-]+\+)+[\w\d-]+)\/?$//) {
+        push @{$loathsxome::filters{tags}}, split(/\+/, $1);
+    }
+    elsif ($loathsxome::path_info =~ s/^((?:[\w\d-]+\/)+[\w\d-]+)\/?$// ||
+           $loathsxome::path_info =~ s/^([\w\d+-]+)\/?$//)
+    {
         push @{$loathsxome::filters{tags}}, $1;
     }
 }

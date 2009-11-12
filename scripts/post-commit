@@ -41,7 +41,7 @@ do
     done
 
     mtime=$(($(date -d "$date" +%s)+$gmtoff))
-    tags=$(echo $tags|sed 's/[, ]\+/+/g')
+    tags=$(echo $tags|sed 's/[, ]\+/,/g')
 
     echo $a mtime=$mtime tags=$tags
 done|sort > $ENTRIES

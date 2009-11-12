@@ -34,7 +34,12 @@ sub parse_uri {
         $loathsxome::filters{date} = $1;
     }
 
-    while ($loathsxome::path_info =~ s/^(\w+)(?:[\+\/]|$)//) {
+    if ($loathsxome::path_info =~ s/^((?:[\w\d-]+\+)+[\w\d-]+)\/?$//) {
+        push @{$loathsxome::filters{tags}}, split(/\+/, $1);
+    }
+    elsif ($loathsxome::path_info =~ s/^((?:[\w\d-]+\/)+[\w\d-]+)\/?$// ||
+           $loathsxome::path_info =~ s/^([\w\d+-]+)\/?$//)
+    {
         push @{$loathsxome::filters{tags}}, $1;
     }
 }
@@ -55,8 +60,8 @@ sub entries {
                 if (s/^mtime=(\d+) ?//) {
                     $prop->{mtime} = $1-$loathsxome::gmtoff;
                 }
-                if (s/^tags=((?:[\w\d-]+\+)*[\w\d-]*) ?//) {
-                    push @{$prop->{tags}}, split(/\+/, $1);
+                if (s/^tags=((?:[\w\d+-]+,)*[\w\d+-]*) ?//) {
+                    push @{$prop->{tags}}, split(/,/, $1);
                 }
                 $entries{$f} = $prop;
             }

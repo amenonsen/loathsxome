@@ -6,7 +6,7 @@
 # The entries file is assumed to contain one line per post, with the
 # following format (where the filename is relative to $datadir):
 #
-# filename mtime=NNNN tags=a+b key=value ...
+# filename mtime=NNNN tags=a,b key=value ...
 
 package loathsxome::entrycache;
 
@@ -30,8 +30,8 @@ sub entries {
                 if (s/^mtime=(\d+) ?//) {
                     $prop->{mtime} = $1-$loathsxome::gmtoff;
                 }
-                if (s/^tags=((?:[\w\d-]+\+)*[\w\d-]*) ?//) {
-                    push @{$prop->{tags}}, split(/\+/, $1);
+                if (s/^tags=((?:[\w\d+-]+,)*[\w\d+-]*) ?//) {
+                    push @{$prop->{tags}}, split(/,/, $1);
                 }
                 $entries{$f} = $prop;
             }
