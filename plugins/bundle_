@@ -213,7 +213,7 @@ sub story {
 
     # "Read more" links for long posts (only) on HTML index views
     if ($loathsxome::content_type =~ /^text\/html/ and
-        not $loathsxome::post)
+        not ($loathsxome::post or $loathsxome::post_index == 1))
     {
         my $link = "$loathsxome::postlink";
         $$body =~ s{\cL.*}{<a href="$link">Read more\&hellip;</a>}sm;

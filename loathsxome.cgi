@@ -35,7 +35,7 @@ use vars qw(
     $depth $flavour @flavours @plugins %filters $path_info $post $entries $sort
     %entries @entries %template $template $interpolate $content_type $output
     $title $body $startnum $endnum $fn $datetime $gmtoff $postlink $rsslink
-    $version @post_flavours @index_flavours
+    $version @post_flavours @index_flavours $post_index
 );
 
 use CGI qw/:standard/;
@@ -279,6 +279,7 @@ print header(-type => $content_type);
 
         ($fn = $entry) =~ s/\.$extension//;
         $postlink = "$url/$fn";
+        $post_index = $n;
 
         # Load file contents (unless already loaded)
         if (not exists $entries{$entry}{title} && -f "$datadir/$entry") {
