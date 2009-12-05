@@ -30,11 +30,11 @@ sub parse_uri {
     # a valid tag name (as some people who shall remain nameless seem to
     # expect). But don't try to use a tag named "a+b". Just Don't Do It.
 
-    if ($loathsxome::path_info =~ s/^((?:[\w\d-]+\+)+[\w\d-]+)\/?$//) {
+    if ($loathsxome::path_info =~ s/^((?:[\w\d-]+\+)+[\w\d-]+)(?:\/|$)//) {
         push @{$loathsxome::filters{tags}}, split(/\+/, $1);
     }
-    elsif ($loathsxome::path_info =~ s/^((?:[\w\d-]+\/)+[\w\d-]+)\/?$// ||
-           $loathsxome::path_info =~ s/^([\w\d+-]+)\/?$//)
+    elsif ($loathsxome::path_info =~ s/^((?:[\w\d-]+\/)+[\w\d-]+)(?:\/|$)// ||
+           $loathsxome::path_info =~ s/^([\w\d+-]+)(?:\/|$)//)
     {
         push @{$loathsxome::filters{tags}}, $1;
     }
