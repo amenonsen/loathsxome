@@ -152,10 +152,12 @@ sub head {
 
     return if $post;
 
+    my $url_base = url() . path_info();
+
     $loathsxome::newerposts = "";
     if ($page > 1) {
         param(page => $page-1);
-        my $url = url(-path_info => 1, -query => 1);
+        my $url = $url_base ."?". query_string;
         $loathsxome::newerposts =
             qq{<a href="$url">&laquo; Newer posts</a>};
     }
@@ -163,7 +165,7 @@ sub head {
     my @list;
     for my $n (1..$pages) {
         param(page => $n);
-        my $url = url(-path_info => 1, -query => 1);
+        my $url = $url_base ."?". query_string;
 
         push @list,
             $n == $page ?
@@ -179,7 +181,7 @@ sub head {
     $loathsxome::olderposts = "";
     if ($pages > $page) {
         param(page => $page+1);
-        my $url = url(-path_info => 1, -query => 1);
+        my $url = $url_base ."?". query_string;
         $loathsxome::olderposts =
             qq{<a href="$url">Older posts &raquo;</a>};
     }
