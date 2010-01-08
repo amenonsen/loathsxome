@@ -11,6 +11,8 @@
 
 package loathsxome;
 
+use POSIX qw/strftime/;
+
 # --- Configuration ---
 
 $name = "Pretensions to eloquence";
@@ -255,7 +257,9 @@ if ($post and open(my $fh, "$datadir/$post")) {
 $content_type = $template->($post, 'content_type', $flavour);
 $content_type =~ s/\n.*$//s;
 
-print header(-type => $content_type);
+my $time = time;
+my $mtime = undef;
+
 {
     # First, generate the page header
     my $head = $template->($post, 'head', $flavour);
@@ -289,6 +293,13 @@ print header(-type => $content_type);
         }
         $title = $entries{$entry}{title};
         $body = $entries{$entry}{body};
+
+        if ( !defined $mtime ||
+             ( $mtime < $entries{$entry}{mtime} &&
+               $entries{$entry}{mtime} < $time ) )
+        {
+            $mtime = $entries{$entry}{mtime};
+        }
 
         # Generate a formatted date (each time we encounter a new one)
         my $date = $template->($post, 'date', $flavour);
@@ -337,6 +348,16 @@ print header(-type => $content_type);
     run_plugins('last');
     run_plugins('end');
 }
+
+my %fields;
+
+$fields{-type} = $content_type;
+if ( defined $mtime ) {
+    $fields{-last_modified} =
+        strftime("%a, %d %b %Y %H:%M:%S %Z", localtime($mtime));
+}
+
+print header(%fields);
 print $output;
 
 sub from_first_plugin {
