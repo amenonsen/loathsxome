@@ -30,21 +30,16 @@ done
 
 # Next, update the cache.
 gmtoff=$(perl -MPOSIX=mktime,difftime -le 'print difftime(mktime(localtime),mktime(gmtime))')
-find $DATADIR -name \*.post|sed 's,^'$DATADIR'/,,'|
+git ls-files $DATADIR/\*.post|sed 's,^'$DATADIR'/,,'|
 while read a;
 do
-    for i in date tags;
-    do
-        meta="meta: $i="
-        v=$(grep -h "$meta" $DATADIR/$a|sed "s/$meta//")
-        eval $i=\"$v\" # "
-    done
+    eval $(grep -h '^meta: [a-z][a-z]*=' $DATADIR/$a|sed -e 's/^meta: //' -e 's/=/="/' -e 's/$/"/')
 
     mtime=$(($(date -d "$date" +%s)+$gmtoff))
     tags=$(echo $tags|sed 's/[, ]\+/,/g')
 
     echo $a mtime=$mtime tags=$tags
 done|sort > $ENTRIES
-test -f $ENTRIES && git add $ENTRIES
+git add $ENTRIES
 
-git diff-index --quiet --cached HEAD || git commit -m "Auto: meta update."
+git diff-index --quiet --cached HEAD || git commit -m "Auto: meta update"
