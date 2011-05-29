@@ -27,8 +27,9 @@ $extension = "post";
 $depth = 0;
 
 $flavour = "html";
-@flavours = qw(html rss);
-@post_flavours = qw(html);
+@flavours = ();
+@post_flavours = ();
+@index_flavours = qw(html atom rss);
 
 # --- No user-serviceable parts below this line ---
 
@@ -37,7 +38,8 @@ use vars qw(
     $depth $flavour @flavours @plugins %filters $path_info $post $entries $sort
     %entries @entries %template $template $interpolate $content_type $output
     $title $body $startnum $endnum $fn $datetime $gmtoff $postlink $rsslink
-    $version @post_flavours @index_flavours $post_index
+    $version @post_flavours @index_flavours $post_index $pubdate $updated
+    $atomlink $atomdate
 );
 
 use CGI qw/:standard/;
@@ -52,6 +54,7 @@ $url ||= url();
 $gmtoff = difftime(mktime(localtime), mktime(gmtime));
 
 $rsslink = "$url/index.rss";
+$atomlink = "$url/index.atom";
 
 map { s/\/$// } $url, $datadir, $plugindir, $statedir;
 
@@ -260,6 +263,13 @@ $content_type =~ s/\n.*$//s;
 my $time = time;
 my $mtime = undef;
 
+my @mtimes =
+    map { $entries{$_}{mtime} }
+        sort { $entries{$b}{mtime} <=> $entries{$a}{mtime} }
+            keys %entries;
+
+$updated = strftime("%Y-%m-%dT%H:%M:%SZ", localtime($mtimes[0]));
+
 {
     # First, generate the page header
     my $head = $template->($post, 'head', $flavour);
@@ -403,7 +413,7 @@ __DATA__
 html content_type text/html; charset=utf-8
 html head <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 html head <html><head>
-html head <link rel=alternate type="application/rss+xml" title="$name" href="$rsslink">
+html head <link rel=alternate type="application/atom+xml" title="$name" href="$atomlink">
 html head <title>$pagetitle</title>
 html head </head><body>
 html head <h1>$heading</h1>
@@ -419,15 +429,27 @@ html foot <p style="text-align: center">
 html foot $newerposts $pagelist $olderposts
 html foot </body></html>
 
+atom content_type application/atom+xml; charset=utf-8
+atom head <?xml version="1.0" encoding="utf-8"?>
+atom head <feed xmlns="http://www.w3.org/2005/Atom">
+atom head <title>$pagetitle</title><link href="$url"/>
+atom head <author><name>Abhijit Menon-Sen</name><email>ams@toroid.org</email></author>
+atom head <link rel="self" type="application/atom+xml" href="$atomlink"/>
+atom head <id>$url</id><updated>$updated</updated>
+atom story <entry>
+atom story <title type="html">$title</title><link href="$postlink"/>
+atom story <id>$postlink</id><content type="html">$body</content><updated>$atomdate</updated>
+atom story </entry>
+atom foot </feed>
+atom date
+
 rss content_type text/xml; charset=utf-8
 rss head <?xml version="1.0" encoding="utf-8"?>
-rss head <?xml-stylesheet title="CSS_formatting" type="text/css" href="http://www.interglacial.com/rss/rss.css"?>
-rss head <!-- name="generator" content="loathsxome/$version" -->
-rss head <!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "http://my.netscape.com/publish/formats/rss-0.91.dtd">
-rss head <rss version="0.91"><channel>
+rss head <rss version="2.0"><channel>
 rss head <link>$url</link><title>$pagetitle</title>
 rss head <description>$description</description><language>$language</language>
-rss story <item><title>$title</title><link>$postlink</link><description>$body</description></item>
+rss story <item><title>$title</title><link>$postlink</link><pubDate>$pubdate</pubDate>
+rss story <description>$body</description></item>
 rss foot </channel></rss>
 rss date
 __END__
