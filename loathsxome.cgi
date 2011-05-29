@@ -334,7 +334,7 @@ $updated = strftime("%Y-%m-%dT%H:%M:%SZ", localtime($mtimes[0]));
                 '"' => '&quot;', "'" => '&apos;'
             );
 
-            my $uesc_re = qr([^-/a-zA-Z0-9:._]);
+            my $uesc_re = qr([^-/a-zA-Z0-9:._~]);
             $url   =~ s($uesc_re)(sprintf('%%%02X', ord($&)))eg;
             $fn    =~ s($uesc_re)(sprintf('%%%02X', ord($&)))eg;
 
