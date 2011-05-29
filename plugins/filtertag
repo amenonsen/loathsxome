@@ -62,6 +62,7 @@ sub head {
     if (exists $loathsxome::filters{tags}) {
         my $tags = join '+', @{$loathsxome::filters{tags}};
         $loathsxome::rsslink = qq{$loathsxome::url/$tags/index.rss};
+        $loathsxome::atomlink = qq{$loathsxome::url/$tags/index.atom};
     }
 
     return 1;

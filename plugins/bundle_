@@ -142,12 +142,13 @@ sub head {
     $loathsxome::pagetitle = $loathsxome::name;
     if ($post) {
         my $title = $loathsxome::entries{$post}{title};
-    	$loathsxome::pagetitle .= ": " . $title;
+        $loathsxome::pagetitle .= ": " . $title;
     }
 
     if (exists $loathsxome::filters{tags}) {
         my $tags = join '+', @{$loathsxome::filters{tags}};
         $loathsxome::rsslink = qq{$loathsxome::url/$tags/index.rss};
+        $loathsxome::atomlink = qq{$loathsxome::url/$tags/index.atom};
     }
 
     return if $post;
@@ -192,10 +193,16 @@ sub date {
 
     my $mtime = $loathsxome::entries{$entry}->{mtime};
 
+    $loathsxome::date =
+        strftime( "%Y-%m-%d", localtime($mtime));
     $loathsxome::fulldate =
         strftime( "%A, %d %B %Y", localtime($mtime));
     $loathsxome::datetime =
         strftime( "%Y-%m-%d %H:%M:%S", localtime($mtime));
+    $loathsxome::pubdate =
+        strftime( "%a, %d %b %Y %H:%M:%S %z", localtime($mtime));
+    $loathsxome::atomdate =
+        strftime( "%Y-%m-%dT%H:%M:%SZ", localtime($mtime));
 }
 
 sub story {
@@ -216,7 +223,7 @@ sub story {
     # "Read more" links for selected long posts on index views (only)
     unless ($loathsxome::post or $loathsxome::post_index == 1) {
         my $link = "$loathsxome::postlink";
-        $$body =~ s{\cL.*}{<a href="$link">Read more\&hellip;</a>}sm;
+        $$body =~ s{\cL.*}{<p><a href="$link">Read more\&hellip;</a>}sm;
     }
     $$body =~ y/\cL//d;
 

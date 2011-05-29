@@ -19,7 +19,7 @@ sub head {
     $loathsxome::pagetitle = $loathsxome::name;
     if ($post) {
         my $title = $loathsxome::entries{$post}{title};
-    	$loathsxome::pagetitle .= ": " . $title;
+        $loathsxome::pagetitle .= ": " . $title;
     }
 }
 

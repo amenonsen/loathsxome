@@ -17,10 +17,16 @@ sub date {
 
     my $mtime = $loathsxome::entries{$post}->{mtime};
 
+    $loathsxome::date =
+        strftime( "%Y-%m-%d", localtime($mtime));
     $loathsxome::fulldate =
         strftime( "%A, %d %B %Y", localtime($mtime));
     $loathsxome::datetime =
         strftime( "%Y-%m-%d %H:%M:%S", localtime($mtime));
+    $loathsxome::pubdate =
+        strftime( "%a, %d %b %Y %H:%M:%S %z", localtime($mtime));
+    $loathsxome::atomdate =
+        strftime( "%Y-%m-%dT%H:%M:%SZ", localtime($mtime));
 }
 
 1;
