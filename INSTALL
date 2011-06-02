@@ -37,9 +37,8 @@ Installation instructions
    you must set $url, otherwise you can set it to an empty string).
    Set $datadir etc. to the directories you created in step (3).
 
-5. Copy the desired plugins to the plugin directory. The simplest way is
-   to copy plugins/bundle_ to /home/despot/loathsxome/plugins/bundle (no
-   trailing _ on the second name). Or you can pick and choose plugins.
+5. Copy plugins/bundle to the plugin directory, i.e.
+   cp plugins/bundle /home/despot/loathsxome/plugins/
 
 6. loathsxome.cgi fills in the built-in template components to generate
    the header, body, and footer of each page, but you can override this
