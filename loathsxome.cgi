@@ -176,6 +176,15 @@ run_plugins('filter');
 
 not_found() unless keys %entries;
 
+if ((my @e = keys %entries) == 1 && !$post) {
+    (my $fn = $e[0]) =~ s/\.$extension//;
+    print "Status: 302 Found\r\n";
+    print "Location: $url/$fn\r\n";
+    print "Content-Type: text/plain\r\n\r\n";
+    print "Redirecting to article: $url/$fn.\r\n";
+    exit;
+}
+
 # Sort the entries for display
 #
 # We define a default sorting function that sorts entries in descending
