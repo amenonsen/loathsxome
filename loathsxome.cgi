@@ -15,10 +15,10 @@ use POSIX qw/strftime/;
 
 # --- Configuration ---
 
+$url = "http://example.com/despot/journal";
 $name = "Pretensions to eloquence";
 $description = "Chronicles of despotism and debauchery";
 $language = "en";
-$url = "http://example.com/despot/journal";
 
 $datadir = "/home/despot/loathsxome";
 $plugindir = "$datadir/plugins";
@@ -300,7 +300,9 @@ $updated = strftime("%Y-%m-%dT%H:%M:%SZ", localtime($mtimes[0]));
             next;
         }
 
+        my $uesc_re = qr([^-/a-zA-Z0-9:._]);
         ($fn = $entry) =~ s/\.$extension//;
+        (my $efn = $fn) =~ s($uesc_re)(sprintf('%%%02X', ord($&)))eg;
         $postlink = "$url/$fn";
         $post_index = $n;
 
@@ -340,17 +342,12 @@ $updated = strftime("%Y-%m-%dT%H:%M:%SZ", localtime($mtimes[0]));
         {
             my %escape = (
                 '<' => '&lt;', '>' => '&gt;', '&' => '&amp;',
-                '"' => '&quot;', "'" => '&apos;'
+                '"' => '&quot;'
             );
-
-            my $uesc_re = qr([^-/a-zA-Z0-9:._~]);
-            $url   =~ s($uesc_re)(sprintf('%%%02X', ord($&)))eg;
-            $fn    =~ s($uesc_re)(sprintf('%%%02X', ord($&)))eg;
 
             my $hesc_re = join '|' => keys %escape;
             $title =~ s/($hesc_re)/$escape{$1}/g;
             $body  =~ s/($hesc_re)/$escape{$1}/g;
-            $url   =~ s/($hesc_re)/$escape{$1}/g;
             $fn    =~ s/($hesc_re)/$escape{$1}/g;
         }
 
