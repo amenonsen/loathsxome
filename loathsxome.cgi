@@ -303,7 +303,7 @@ $updated = strftime("%Y-%m-%dT%H:%M:%SZ", localtime($mtimes[0]));
         my $uesc_re = qr([^-/a-zA-Z0-9:._]);
         ($fn = $entry) =~ s/\.$extension//;
         (my $efn = $fn) =~ s($uesc_re)(sprintf('%%%02X', ord($&)))eg;
-        $postlink = "$url/$fn";
+        $postlink = "$url/$efn";
         $post_index = $n;
 
         # Load file contents (unless already loaded)
