@@ -35,7 +35,7 @@ sub parse_uri {
     }
 
     if ($loathsxome::path_info =~ s/^((?:[\w\d-]+\+)+[\w\d-]+)(?:\/|$)//) {
-        push @{$loathsxome::filters{tags}}, split(/\+/, $1);
+        push @{$loathsxome::filters{tags}}, split(/\+(?!\+)/, $1);
     }
     elsif ($loathsxome::path_info =~ s/^((?:[\w\d-]+\/)+[\w\d-]+)(?:\/|$)// ||
            $loathsxome::path_info =~ s/^([\w\d+-]+)(?:\/|$)//)
