@@ -34,7 +34,7 @@ sub parse_uri {
         $loathsxome::filters{date} = $1;
     }
 
-    if ($loathsxome::path_info =~ s/^((?:[\w\d-]+\+)+[\w\d-]+)(?:\/|$)//) {
+    if ($loathsxome::path_info =~ s/^((?:[\w\d-]+\++)+[\w\d-]+\+*)(?:\/|$)//) {
         push @{$loathsxome::filters{tags}}, split(/\+(?!\+)/, $1);
     }
     elsif ($loathsxome::path_info =~ s/^((?:[\w\d-]+\/)+[\w\d-]+)(?:\/|$)// ||
