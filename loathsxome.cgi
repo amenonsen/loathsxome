@@ -417,23 +417,29 @@ sub not_found {
 
 __DATA__
 html content_type text/html; charset=utf-8
-html head <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+html head <!doctype html>
 html head <html><head>
+html head <meta name="viewport" content="width=device-width">
+html head <meta charset=utf-8>
+html head <link rel=stylesheet type="text/css" href="loathsxome.css">
 html head <link rel=alternate type="application/atom+xml" title="$name" href="$atomlink">
 html head <title>$pagetitle</title>
-html head </head><body>
-html head <h1>$heading</h1>
-html date <h2>$fulldate</h2>
-html story <h3><a href="$postlink">$title</a></h3>
+html head </head><body><header>
+html head $heading
+html head </header>
+html date <div class="date">$fulldate</div>
+html story <article>
+html story <h1><a href="$postlink">$title</a></h3>
 html story $body
 html story <p>
 html story $datetime
 html story [$taglinks]
 html story <a href="$postlink">link</a>
+html story </article>
 html story
-html foot <p style="text-align: center">
+html foot <footer>
 html foot $newerposts $pagelist $olderposts
-html foot </body></html>
+html foot </footer></body></html>
 
 atom content_type application/atom+xml; charset=utf-8
 atom head <?xml version="1.0" encoding="utf-8"?>
