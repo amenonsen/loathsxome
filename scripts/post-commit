@@ -33,6 +33,7 @@ gmtoff=$(perl -MPOSIX=mktime,difftime -le 'print difftime(mktime(localtime),mkti
 git ls-files $DATADIR/\*.post|sed 's,^'$DATADIR'/,,'|
 while read a;
 do
+    tags=''
     eval $(grep -h '^meta: [a-z][a-z]*=' $DATADIR/$a|sed -e 's/^meta: //' -e 's/=/="/' -e 's/$/"/')
 
     mtime=$(($(date -d "$date" +%s)+$gmtoff))
