@@ -1,0 +1,352 @@
+/* Basic CSS file for loathsxome.
+
+   This file produces three mostly independent styles, one for mobile
+   phones, one for widescreen devices and one for printout. It is
+   intended to look basic and to be easily modifiable. Whenever there
+   was a choice between good looks and ease of modification, looks
+   were sacrificed.  Loathsxome users don't use the default CSS
+   anyway, right?
+
+   This file are five sections. 1) A CSS reset, to override varying
+   browser defaults and make the other sections easy to test.
+   2) Common colours and fonts. 3) Widescreen style, mostly used by
+   real computers. 4) Narrow style, mostly used by mobile phones.
+   5) Printout style.
+*/
+
+
+/* Section 1: CSS Reset. Do not edit this; cross-browser compatibility
+   works much better if you leave this alone. Add overrides in the other
+   sections (as section 2 overrides the line-height on body).
+
+   http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+
+/* Section 2: Common colours, fonts and so on. */
+
+
+body {
+    color: #101010;
+    background: #ffffff;
+    line-height: 1.5;
+}
+
+a {
+    text-decoration: none;
+}
+
+
+i {
+    font-style: italic;
+}
+
+b {
+    font-weight: bolder;
+}
+
+
+h1 a, a:visited[rel=nofollow] {
+    color: inherit;
+}
+
+
+/* At this point the real style work starts. Time to discuss the
+   difficult bits.
+
+   The main problem with these styles tends to what happens between
+   postings. This should come as no surprise, after all the postings
+   are by far the most important aspect of a blog.
+
+   Loathsxome creates the sequence
+   <header><div.date><article><article><div.date><article><footer>
+   when the blog contains one posting on its own day and two on the
+   following day.
+
+   If you want something to happen between postings, there are many
+   cases. Should it happen between any two postings, or do you want to
+   treat same-day postings differently from day boundaries? Should it
+   happen between the header and first posting?  Between the last
+   posting and footer?
+
+   Here are some selectors to match various cases:
+
+   article+div.date, article+article
+
+      Use padding-top, margin-top, border-top etc. to look at the
+      space between postings, excluding that near header/footer.
+
+   article+article
+
+      Use -top to look at the space between postings on the same day.
+
+   article+div.date
+
+      Use -top to look at the space between days.
+
+   article
+
+      Use padding-bottom etc to look at the space between postings,
+      including the space between the last posting and the footer.
+
+   If the date/article schisma creates too many problems for your
+   style sheet, you can also move the date into the story (ie. move
+   $fulldate from a 'html date' line in the template to a 'html story'
+   line). That will give you a simpler DOM structure, but when you
+   post five times in a day, Loathsxome will repeat the date. Can't
+   have your cake and eat it.
+*/
+
+
+
+/* Section 3: Widescreen style. */
+
+/* This is for devices whose screen is so wide enough to accommodate a
+   full line (about 35-40 characters), typically biggish tablets,
+   laptops and desktops. A desktop monitor is MUCH too wide for 40
+   characters, so we use two media selectors, and add a left margin if
+   there's space for about 50 characters.  */
+
+/* The first selector limits line length and adds margins here and
+   there, and sets big fonts on the headlinery.
+*/
+
+@media screen and (min-width: 601px) {
+    body {
+        max-width: 38em;
+        margin-left: 2em;
+        margin-right: 1em; /* narrower because ragged-right likes that */
+    }
+
+    header {
+        font-weight: bolder;
+        text-align: center;
+        border: 4px double #000;
+        text-transform: uppercase;
+        padding: 1em;
+        margin: 1em;
+    }
+
+    header, article {
+        margin-bottom: 2em; /* space between postings, and before the first */
+    }
+
+    article {
+        padding-bottom: 1em; /* border between postings */
+        border-bottom: 1px solid #999;
+    }
+
+    p, h1, h2 {
+        margin-top: 1em; /* one line between paragraphs */
+        margin-bottom: 1em;
+    }
+
+    h1 { /* make h1 twice as big as the rest */
+        font-size: 2.0em;
+    }
+
+    h2 { /* make h2 line paragraphs, but bolder */
+        font-weight: bolder;
+        line-height: inherit;
+    }
+
+    div.date+article h1 { /* move header and associated date closer */
+        margin-top: 0px;
+    }
+
+    blockquote {
+        padding-left: 2em;
+    }
+}
+
+/* The second selector adds a wider left margin, and shifts the date
+   into the left margin.
+*/
+
+@media screen and (min-width: 801px) {
+    body {
+        margin-left: 8em;
+    }
+
+    div.date {
+        float: left;
+        margin-left: -8em;
+        margin-top: 0em;
+        width: 7em;
+        text-align: right;
+    }
+}
+
+
+/* Section 4: Mobile phones. */
+
+@media screen and (max-width: 600px) {
+    body {
+        margin-left: 0.5em;
+        margin-right: 0.5em;
+    }
+
+    header { /* if you like the default blogspot style, you'll love this */
+        font-weight: bolder;
+        text-align: center;
+        border: 4px double #000;
+        text-transform: uppercase;
+        padding: 1em;
+        margin: 1em;
+    } /* ... and maybe you should reconsider your preferences */
+
+    header, article {
+        margin-bottom: 2em; /* space between postings */
+    }
+
+    article { /* gray line between postings, but not before the first one */
+        padding-bottom: 2em;
+        border-bottom: 1px solid #999;
+    }
+
+    div.date+article h1 { /* move date and headline closer ... */
+        margin-top: 0px;
+    }
+    div.date:after { /* and tie them close textually too */
+        content: ":";
+    }
+
+    p, h1, h2 { /* a bit of space between paragraphs, but not much */
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+
+    h1 { /* h1 and h2 are both regularly sized, but bold */
+        font-weight: bolder;
+    }
+
+    h2 {
+        font-weight: bolder;
+    }
+
+    blockquote {
+        padding-left: 1em;
+    }
+}
+
+
+/* Section 5: Print style. */
+
+/* First set up the page, if the browser supports that. Most don't. */
+
+@page {
+    counter-increment: page;
+    size: a4;
+    padding: 0;
+    margin: 1.8cm 0 1.8cm 0;
+
+    @top-left, @top-center, @top-right, @bottom-left, @bottom-right {
+        content: "";
+    }
+
+    @bottom-center {
+        font-size: 7px;
+        content: "Loathsxome's default print style: "
+                 string(title)
+                 ", page "
+                 counter(page);
+    }
+}
+
+/* Next, we print one posting per page, suppress the date and footer,
+   and the rest is really basic.
+*/
+
+@media print {
+    body {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    header {
+        font-weight: bolder;
+        text-align: center;
+        text-transform: uppercase;
+        padding: 1em;
+        margin: 1em;
+    }
+
+    header, article {
+        margin-bottom: 2em; /* space between postings */
+    }
+
+    div.date {
+        display: none;
+    }
+
+    p, h1, h2 {
+        margin-top: 1em;
+        margin-bottom: 1em;
+    }
+
+    h1 { /* h1 and h2 are both regularly sized, but bold */
+        font-size: 1.5em;
+    }
+
+    h2 {
+        font-weight: 1.2em;
+    }
+
+    blockquote {
+        padding-left: 2em;
+    }
+
+    article {
+        page-break-after: always;
+    }
+
+    footer {
+        display: none;
+    }
+}
