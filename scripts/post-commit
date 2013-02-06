@@ -37,7 +37,7 @@ do
     eval $(grep -h '^meta: [a-z][a-z]*=' $DATADIR/$a|sed -e 's/^meta: //' -e 's/=/="/' -e 's/$/"/')
 
     mtime=$(($(date -d "$date" +%s)+$gmtoff))
-    tags=$(echo $tags|sed 's/[, ]\+/,/g')
+    tags=$(echo $tags $(echo $a | sed -e 's/[^\/]*$//' -e 's/\// /g') | sed 's/[, ]\+/ /g' | fmt -1 | sort -u | fmt -500 | tr ' ' ,)
 
     echo $a mtime=$mtime tags=$tags
 done|sort > $ENTRIES
