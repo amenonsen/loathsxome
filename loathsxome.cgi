@@ -371,6 +371,9 @@ $fields{-type} = $content_type;
 if ( defined $mtime ) {
     $fields{-last_modified} =
         strftime("%a, %d %b %Y %H:%M:%S %Z", localtime($mtime));
+    my $lt = 1800; # a half-hour cache lifetime for most pages
+    $lt = 4*86400 if ( $post ); # four days for posts
+    $fields{-cache_Control} = "public, max-age=$lt";
 }
 
 print header(%fields);
