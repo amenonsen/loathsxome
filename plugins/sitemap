@@ -1,0 +1,121 @@
+# Loathsxome plugin: sitemap
+# Arnt Gulbrandsen <arnt@gulbrandsen.priv.no>
+
+# This plugin generates a sitemap.xml containing the URLs of all
+# postings. If the blog resides on a site of its own (not in a
+# subdirectory of a bigger site), it also generates a robots.txt
+# pointing to the sitemap so Googlebot will find the sitemap.
+
+# sitemap.xml can live anywhere, so long as something tells Googlebot
+# and its siblings where it is. The most convenient way to do that is to
+# use robots.txt.
+
+# The generated sitemap contains the URLs of all postings (except
+# those whose publication date is in the future) and of all single
+# tags. It does not contain any tag pairs
+# (http://toroid.org/ams/etc/birds+language) or dates
+# (http://toroid.org/ams/etc/201010) since those aren't very
+# useful for search engines.
+
+# There is a sitemap.xml validator at
+# http://www.validome.org/google/validate
+
+
+package loathsxome::sitemap;
+
+use CGI qw/:cgi/;
+use POSIX qw/strftime/;
+use File::stat;
+
+our $sitemap;
+our $robotstxt;
+
+sub start {
+    1;
+}
+
+sub print_robotstxt {
+    print "Status: 200 Yes\r\n",
+	"Cache-Control: public; max-age=300\r\n",
+	"Content-Type: text/plain\r\n\r\n",
+	"User-Agent: *\r\n\r\n",
+	"Sitemap: $loathsxome::url/sitemap.xml\n\n";
+    exit( 0 );
+}
+
+
+sub print_sitemap {
+    # load the entries (loathsxome's core hasn't yet)
+    my %entries = loathsxome::from_first_plugin('entries')->();
+    foreach my $entry ( keys %entries ) {
+	delete $entries{$entry}
+        if ( $entries{$entry}{tags} =~ /\bpreview\b/ ||
+	     $entries{$entry}{mtime} > time );
+    }
+
+    # foreplay for those who like syntax
+    print "Status: 200 Sitemap\r\n",
+	"Cache-Control: public; max-age=300\r\n",
+        "Content-Type: application/xml\r\n\r\n";
+    print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n",
+	"<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"\n",
+        " xmlns:mobile=\"http://www.google.com/schemas/sitemap-mobile/1.0\">\n";
+
+    # print an entry for each post
+    my $hp = 0;
+    my %lm;
+    foreach my $entry (sort keys %entries) {
+	$u = $entry;
+	$u =~ s/\.post//;
+	my $s = &stat("$loathsxome::datadir/$entry");
+	my $mt = $entries{$entry}{mtime};
+	$mt = $s->mtime if ( $s );
+	print strftime( " <url>\n" .
+			"  <loc>$loathsxome::url/$u</loc>\n".
+			"  <lastmod>%Y-%m-%d</lastmod>\n".
+			"  <mobile:mobile/>\n".
+			" </url>\n",
+			localtime($mt) );
+	$hp = $mt if ( $mt > $hp );
+	$lm{$1} = $mt if ( $entry =~ /^(.+)\// &&
+			   ( !defined($lm{$1}) ||
+			     $lm{$1} < $mt ) );
+	# ... and update the modification time for each tag
+	foreach my $et (@{$entries{$entry}{lm}}) {
+	    $lm{$et} = $mt if ( !defined($lm{$1}) || $lm{$1} < $mt );
+	}
+    }
+
+    # print an entry for each single tag
+    foreach my $tag ( sort keys %lm ) {
+	print strftime( " <url>\n".
+			"  <loc>$loathsxome::url/$tag</loc>\n".
+			"  <lastmod>%Y-%m-%d</lastmod>\n".
+			"  <mobile:mobile/>\n".
+			" </url>\n",
+			localtime($lm{$tag}) );
+    }
+
+    # finally the home page
+    print strftime( " <url>\n".
+		    "  <loc>$loathsxome::url</loc>\n".
+		    "  <lastmod>%Y-%m-%d</lastmod>\n".
+		    "  <mobile:mobile/>\n".
+		    " </url>\n",
+		    localtime($hp) );
+
+    print "</urlset>\n";
+    exit( 0 );
+}
+
+
+sub parse_uri {
+    if ($loathsxome::path_info eq "sitemap.xml") {
+        print_sitemap();
+    } elsif ($loathsxome::path_info eq "robots.txt" &&
+             $loathsxome::url =~ /:\/\/[^\/]*$/) {
+        print_robotstxt();
+    }
+}
+
+1;
