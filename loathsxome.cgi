@@ -180,6 +180,7 @@ if ((my @e = keys %entries) == 1 && !$post) {
     (my $fn = $e[0]) =~ s/\.$extension//;
     print "Status: 302 Found\r\n";
     print "Location: $url/$fn\r\n";
+    print "Cache-Control: public, max-age=300\r\n";
     print "Content-Type: text/plain\r\n\r\n";
     print "Redirecting to article: $url/$fn.\r\n";
     exit;
