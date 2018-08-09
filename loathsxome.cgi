@@ -433,7 +433,7 @@ html head $heading
 html head </header>
 html date <div class="date">$fulldate</div>
 html story <article>
-html story <h1><a href="$postlink">$title</a></h3>
+html story <h1><a href="$postlink">$title</a></h1>
 html story $body
 html story <p>
 html story $datetime
