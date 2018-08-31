@@ -436,6 +436,7 @@ html story <article>
 html story <h1><a href="$postlink">$title</a></h1>
 html story $body
 html story <p>
+html story <div class="toclink">$toclink</div>
 html story $datetime
 html story [$taglinks]
 html story <a href="$postlink">link</a>

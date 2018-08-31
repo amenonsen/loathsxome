@@ -237,6 +237,29 @@ sub story {
     if (@links) {
         $loathsxome::taglinks = join ', ', @links;
     }
+
+    # meta: toc=<file>
+    # meta: toc=<file>|<link text>
+    # may refer to a post containing a directory listing
+    # When no <link text> is given the link text refers to the first tag if available
+    $loathsxome::toclink = "";
+    if ($loathsxome::entries{$entry}{meta}{toc}) {
+        my $link_path;
+        my $link_text;
+
+        if ($loathsxome::entries{$entry}{meta}{toc} =~ /\|/) {
+            ($link_path, $link_text)=split(/\|/, $loathsxome::entries{$entry}{meta}{toc});
+            $link_text .= " \&hellip;";
+        } else {
+            $link_path = $loathsxome::entries{$entry}{meta}{toc};
+            if ($loathsxome::entries{$entry}{tags}[0]) {
+                $link_text = qq{More on $loathsxome::entries{$entry}{tags}[0]\&hellip;};
+            } else {
+                $link_text = "Read more \&hellip;";
+            }
+        }
+        $loathsxome::toclink = qq{<a href="$loathsxome::url/$link_path">$link_text</a>}
+    }
 }
 
 1;

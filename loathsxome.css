@@ -96,6 +96,12 @@ h1 a, a:visited[rel=nofollow] {
     color: inherit;
 }
 
+.toclink {
+    font-weight: bolder;
+    margin-bottom: 0.7em; /* space before tag links */
+    padding: 0.5em;
+}
+
 
 /* At this point the real style work starts. Time to discuss the
    difficult bits.
@@ -272,6 +278,12 @@ h1 a, a:visited[rel=nofollow] {
 
     blockquote {
         padding-left: 1em;
+    }
+
+    .toclink {
+        font-weight: bolder;
+        margin-bottom: 0.7em; /* space before tag links */
+        padding: 0.5em;
     }
 }
 

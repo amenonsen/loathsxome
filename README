@@ -38,6 +38,39 @@ plugins. It is distributed under an MIT-style open source license.
 
 See http://toroid.org/loathsxome for more details.
 
+
+Getting started
+---------------
+
+First of all customize the configuration section in loathsxome.cgi.
+Next you may wish to adapt the css in loathsxome.css or point
+loathsxome.cgi to a customized css file.
+
+Blog posts come to live in the directory specified by the $datadir
+variable in loathsxome.cgi. Each of these plain text files ending on
+the suffix .post must have the following structure:
+
+<Headline>
+meta: date=<publishing_date>
+meta: tags=<tag1> <tag2> [...] <tagn>
+
+<html text formatted according to your css>
+
+
+The <publishing_date> should be given as YYYY-MM-DD HH:mm:ss
+Tags are separated by whitespace, and therefore must not contain
+whitespaces themselves (escaping is not supported).  A third meta line
+may be added to link to another post (e.g. a manually generated table
+of content) in the footer of the post:
+
+meta: toc=<blog_post>[|<link text>]
+
+<blog_post> denotes the path and base name of the post serving as link
+target, the path must be relative to $datadir. If the <link text> is omitted
+the link text will read "More on <tag1>...", or -- when no tags are given --
+"Read more...". <link text> must neither end with a pipe sign
+nor with an ellipsis (as the three dots are always added at the end).
+
 --
 Copyright 2009 Abhijit Menon-Sen <ams@toroid.org>
 http://toroid.org/loathsxome
